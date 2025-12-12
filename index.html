@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kalkulator Bangun Ruang — Responsive (Pastel Blue SVG)</title>
+<style>
+  :root{
+    --bg:#eef6fb; --white:#ffffff; --accent:#6fb3e6; --accent-2:#bfe6ff; --muted:#7aa9cb;
+    --text:#0f2330;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter, system-ui, Arial; background:var(--bg); color:var(--text);
+    padding:20px; display:flex; justify-content:center;
+  }
+
+  .wrap{width:100%; max-width:1100px;}
+
+  /* LOGIN */
+  .loginCard{
+    max-width:380px; margin:40px auto; background:var(--white); padding:22px; border-radius:12px;
+    box-shadow:0 8px 30px rgba(15,34,48,0.06); text-align:center;
+  }
+  .loginCard h2{margin:0 0 12px}
+  .loginCard input{width:100%; padding:10px; margin:8px 0; border-radius:8px; border:1px solid #e6f2fb; background:#fbfeff}
+  .btnPrimary{width:100%; padding:10px; border-radius:10px; border:0; background:linear-gradient(180deg,var(--accent),#3d98d3); color:white; font-weight:600; cursor:pointer}
+  #msg{color:#b00020; margin-top:8px; font-size:14px}
+
+  /* APP */
+  #app{display:none;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px}
+  .topbar h1{font-size:18px; margin:0}
+  .logoutBtn{background:#ff6b6b; color:white; border:0; padding:8px 12px; border-radius:8px; cursor:pointer}
+
+  .panel{display:flex; gap:20px; align-items:flex-start;}
+  .left{flex:1 1 360px; min-width:280px;}
+  .right{flex:1 1 360px; min-width:280px; display:flex; flex-direction:column; gap:16px}
+
+  .card{background:var(--white); padding:16px; border-radius:12px; box-shadow:0 8px 30px rgba(15,34,48,0.04)}
+  .card h3{margin:0 0 10px}
+  label{display:block; font-size:13px; margin-top:8px; color:#214a63}
+  input, select{width:100%; padding:10px 12px; margin-top:6px; border-radius:8px; border:1px solid #e1f0fb; background:#fbfeff}
+
+  .flexRow{display:flex; gap:10px}
+  .calcBtn{background:linear-gradient(180deg,var(--accent),#3d98d3); color:white; padding:10px; border-radius:10px; border:0; cursor:pointer; flex:1}
+  .clearBtn{background:#f5f9fc; color:var(--muted); padding:10px; border-radius:10px; border:1px solid #def0fb; cursor:pointer; flex:1}
+
+  /* SVG box + info box */
+  .visualRow{display:flex; gap:16px; align-items:flex-start}
+  .svgBox{flex:0 0 360px; display:flex; flex-direction:column; gap:10px}
+  .svgFrame{background:var(--white); border-radius:10px; padding:12px; text-align:center; box-shadow:0 6px 18px rgba(15,34,48,0.04)}
+  svg{width:100%; height:320px; display:block}
+  .dimText{font-size:13px; color:#2b5770; text-align:center}
+
+  .infoBox{background:var(--white); padding:12px; border-radius:10px; box-shadow:0 6px 18px rgba(15,34,48,0.04)}
+  .small{font-size:13px; color:#234652}
+  .pill{background:var(--accent-2); padding:8px 10px; border-radius:8px; font-weight:600; display:inline-block; margin-right:8px}
+
+  /* responsive: mobile stacks */
+  @media (max-width:900px){
+    .panel{flex-direction:column}
+    .visualRow{flex-direction:column}
+    .svgBox{flex:1 1 auto}
+    svg{height:260px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- LOGIN CARD -->
+  <div id="loginPage" class="loginCard card">
+    <h2>Member Login</h2>
+    <input id="username" placeholder="Username">
+    <input id="password" placeholder="Password" type="password">
+    <button class="btnPrimary" onclick="login()">Sign In</button>
+    <p id="msg"></p>
+    <p style="margin-top:10px; font-size:13px; color:#3a6f96">Gunakan: <b>123</b> / <b>123</b></p>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="app">
+    <div class="topbar">
+      <h1>Kalkulator Bangun Ruang — Pastel Blue SVG (Responsive)</h1>
+      <div>
+        <button class="logoutBtn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <!-- LEFT: input -->
+      <div class="left">
+        <div class="card">
+          <h3>Pilih Bangun & Input</h3>
+          <label>Pilih Bangun</label>
+          <select id="shape" onchange="onShapeChange()">
+            <option value="kubus">Kubus</option>
+            <option value="balok">Balok</option>
+            <option value="tabung">Tabung</option>
+            <option value="bola">Bola</option>
+            <option value="kerucut">Kerucut</option>
+            <option value="prisma">Prisma Segitiga</option>
+          </select>
+
+          <div id="inputs" style="margin-top:8px"></div>
+
+          <label style="margin-top:10px">Format angka</label>
+          <select id="format">
+            <option value="normal">Normal</option>
+            <option value="2digit">2 Desimal</option>
+            <option value="scientific">Scientific</option>
+          </select>
+
+          <div class="flexRow" style="margin-top:12px">
+            <button class="calcBtn" onclick="calculate()">Hitung</button>
+            <button class="clearBtn" onclick="clearAll()">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: visual + formulas -->
+      <div class="right">
+        <div class="visualRow">
+          <div class="svgBox">
+            <div class="svgFrame card">
+              <h3 style="margin:0 0 8px">Gambar (Preview)</h3>
+              <div id="svgWrap">
+                <svg id="svgCanvas" viewBox="0 0 320 220" preserveAspectRatio="xMidYMid meet"></svg>
+              </div>
+              <div id="dimText" class="dimText">Dimensi: -</div>
+            </div>
+          </div>
+
+          <div class="infoBox">
+            <h3 style="margin:0 0 8px">Rumus & Hasil</h3>
+            <div class="small">
+              <div><b>Volume:</b> <span id="formulaVol">-</span></div>
+              <div style="margin-top:6px"><b>Luas permukaan:</b> <span id="formulaArea">-</span></div>
+            </div>
+
+            <div style="margin-top:12px">
+              <div><b>Hasil</b></div>
+              <div style="margin-top:8px">
+                <span class="pill">Volume: <span id="outVol">-</span></span>
+                <span class="pill">L. Permukaan: <span id="outArea">-</span></span>
+              </div>
+            </div>
+
+            <div style="margin-top:12px">
+              <b>Cara Mengerjakan</b>
+              <div id="steps" class="small" style="margin-top:8px">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Catatan</h3>
+          <p class="small">SVG dibuat vektor (soft flat 3D pastel biru). Ukuran gambar mengikuti input (skala otomatis). Untuk kerucut, jika garis pelukis (s) tidak diisi, sistem akan hitung s = √(r² + t²).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- HELPERS ---------------- */
+function fmt(n){
+  if(n===null || n===undefined || isNaN(n)) return "-";
+  const f = document.getElementById('format').value;
+  if(f==='2digit') return Number(n).toFixed(2);
+  if(f==='scientific') return Number(n).toExponential(2);
+  return Number(n);
+}
+
+/* --------------- LOGIN --------------- */
+function login(){
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value.trim();
+  const msg = document.getElementById('msg');
+  if(u==='123' && p==='123'){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('app').style.display='block';
+    init();
+    msg.textContent='';
+  } else {
+    msg.textContent='❌ Username / Password salah!';
+  }
+}
+function logout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginPage').style.display='';
+  document.getElementById('username').value=''; document.getElementById('password').value='';
+}
+
+/* --------------- TEMPLATES INPUT --------------- */
+const templates = {
+  kubus: [{id:'s', label:'Sisi (s)'}],
+  balok: [{id:'p', label:'Panjang (p)'},{id:'l', label:'Lebar (l)'},{id:'t', label:'Tinggi (t)'}],
+  tabung: [{id:'r', label:'Jari-jari (r)'},{id:'t', label:'Tinggi (t)'}],
+  bola: [{id:'r', label:'Jari-jari (r)'}],
+  kerucut: [{id:'r', label:'Jari-jari (r)'},{id:'t', label:'Tinggi (t)'},{id:'s', label:'Garis pelukis (s) — opsional'}],
+  prisma: [{id:'a', label:'Alas segitiga (a)'},{id:'ta', label:'Tinggi alas (tₐ)'},{id:'T', label:'Tinggi prisma (T)'}]
+};
+
+/* --------------- INIT --------------- */
+function init(){
+  onShapeChange();
+}
+
+/* --------------- UI: build inputs dynamically --------------- */
+function onShapeChange(){
+  const shape = document.getElementById('shape').value;
+  const box = document.getElementById('inputs');
+  box.innerHTML = '';
+  templates[shape].forEach(t=>{
+    const lab = document.createElement('label'); lab.textContent = t.label; box.appendChild(lab);
+    const inp = document.createElement('input'); inp.type='number'; inp.id=t.id; inp.oninput = ()=>{ drawSVG(); autoCalcPreview(); };
+    box.appendChild(inp);
+  });
+  // reset right-side placeholders
+  document.getElementById('formulaVol').textContent='-';
+  document.getElementById('formulaArea').textContent='-';
+  document.getElementById('outVol').textContent='-';
+  document.getElementById('outArea').textContent='-';
+  document.getElementById('steps').innerHTML='-';
+  document.getElementById('dimText').textContent='Dimensi: -';
+  drawSVG();
+}
+
+/* --------------- DRAW SVG (soft flat 3D pastel blue) --------------- */
+function drawSVG(){
+  const shape = document.getElementById('shape').value;
+  const svg = document.getElementById('svgCanvas');
+  svg.innerHTML = ''; // clear
+  const sScale = 6; // scale factor
+  const ns = "http://www.w3.org/2000/svg";
+  function el(tag, attrs={}){ const e=document.createElementNS(ns, tag); for(const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+  const fill = '#cfeefc', fill2 = '#9fd4f9', stroke = '#4ca3d9', light = '#eaf8ff';
+  const cx=160, cy=110;
+  const getVal = id => { const el=document.getElementById(id); if(!el) return NaN; const v=parseFloat(el.value); return isNaN(v)? NaN : v; };
+
+  // soft shadow
+  svg.appendChild(el('ellipse',{cx:cx, cy:cy+95, rx:120, ry:26, fill:'rgba(12,60,90,0.06)'}));
+
+  if(shape==='kubus'){
+    const s = getVal('s') || 10;
+    const px = Math.min(120, Math.max(24, s * sScale));
+    svg.appendChild(el('rect',{x:cx-px/2, y:cy-px/2+10, width:px, height:px, fill:fill, stroke:stroke, 'stroke-width':2, rx:8}));
+    svg.appendChild(el('polygon',{points:`${cx-px/2},${cy-px/2+10} ${cx-px/2+px*0.28},${cy-px/2-18} ${cx+px/2+px*0.28},${cy-px/2-18} ${cx+px/2},${cy-px/2+10}`, fill:fill2, stroke:stroke, 'stroke-width':1.5}));
+    svg.appendChild(el('polygon',{points:`${cx+px/2},${cy-px/2+10} ${cx+px/2+px*0.28},${cy-px/2-18} ${cx+px/2+px*0.28},${cy+px/2-18} ${cx+px/2},${cy+px/2+10}`, fill:fill, stroke:stroke, 'stroke-width':1.2, opacity:0.95}));
+    document.getElementById('dimText').textContent = `s = ${s}`;
+  }
+
+  if(shape==='balok'){
+    const p=getVal('p')||12, l=getVal('l')||6, t=getVal('t')||8;
+    const w=Math.min(160, Math.max(30, p*sScale)), h=Math.min(120, Math.max(20, t*sScale));
+    svg.appendChild(el('rect',{x:cx-w/2, y:cy-h/2+10, width:w, height:h, fill:fill, stroke:stroke, 'stroke-width':2, rx:8}));
+    svg.appendChild(el('polygon',{points:`${cx-w/2},${cy-h/2+10} ${cx-w/2+24},${cy-h/2-22} ${cx+w/2+24},${cy-h/2-22} ${cx+w/2},${cy-h/2+10}`, fill:fill2, stroke:stroke, 'stroke-width':1.5}));
+    document.getElementById('dimText').textContent = `p=${p}, l=${l}, t=${t}`;
+  }
+
+  if(shape==='tabung'){
+    const r=getVal('r')||10, t=getVal('t')||18;
+    const rx=Math.min(90, Math.max(12, r*sScale)), h=Math.min(160, Math.max(24, t*sScale));
+    svg.appendChild(el('ellipse',{cx:cx, cy:cy-h/2, rx:rx, ry:18, fill:fill2, stroke:stroke, 'stroke-width':1.6}));
+    svg.appendChild(el('rect',{x:cx-rx, y:cy-h/2, width:rx*2, height:h, fill:fill, stroke:stroke, 'stroke-width':1.6}));
+    svg.appendChild(el('ellipse',{cx:cx, cy:cy+h/2, rx:rx, ry:18, fill:fill2, stroke:stroke, 'stroke-width':1.6}));
+    document.getElementById('dimText').textContent = `r=${r}, t=${t}`;
+  }
+
+  if(shape==='bola'){
+    const r=getVal('r')||20;
+    const rr=Math.min(110, Math.max(12, r*sScale));
+    svg.appendChild(el('circle',{cx:cx, cy:cy, r:rr, fill:fill2, stroke:stroke, 'stroke-width':1.6}));
+    svg.appendChild(el('ellipse',{cx:cx-rr*0.22, cy:cy-rr*0.42, rx:rr*0.28, ry:rr*0.12, fill:light, opacity:0.6}));
+    document.getElementById('dimText').textContent = `r=${r}`;
+  }
+
+  if(shape==='kerucut'){
+    const r=getVal('r')||14, t=getVal('t')||24;
+    const rx=Math.min(90, Math.max(12, r*sScale)), h=Math.min(160, Math.max(24, t*sScale));
+    svg.appendChild(el('ellipse',{cx:cx, cy:cy-h/2+8, rx:rx, ry:16, fill:fill2, stroke:stroke, 'stroke-width':1.5}));
+    svg.appendChild(el('polygon',{points:`${cx-rx},${cy-h/2+8} ${cx+rx},${cy-h/2+8} ${cx},${cy+h/2+30}`, fill:fill, stroke:stroke, 'stroke-width':1.6}));
+    document.getElementById('dimText').textContent = `r=${r}, t=${t}`;
+  }
+
+  if(shape==='prisma'){
+    const a=getVal('a')||18, ta=getVal('ta')||12, T=getVal('T')||22;
+    const baseW=Math.min(160, Math.max(26, a*sScale)), triH=Math.min(120, Math.max(18, ta*sScale)), off=36;
+    const p1x = cx-baseW/2, p1y = cy + triH/2 - 20;
+    const p2x = cx, p2y = cy - triH/2 - 18;
+    const p3x = cx+baseW/2, p3y = p1y;
+    svg.appendChild(el('polygon',{points:`${p1x},${p1y} ${p2x},${p2y} ${p3x},${p3y}`, fill:fill, stroke:stroke, 'stroke-width':1.6}));
+    svg.appendChild(el('polygon',{points:`${p1x+off},${p1y+off} ${p2x+off},${p2y+off} ${p3x+off},${p3y+off}`, fill:fill2, stroke:stroke, 'stroke-width':1.2, opacity:0.95}));
+    svg.appendChild(el('line',{x1:p1x, y1:p1y, x2:p1x+off, y2:p1y+off, stroke:stroke, 'stroke-width':1.2}));
+    svg.appendChild(el('line',{x1:p2x, y1:p2y, x2:p2x+off, y2:p2y+off, stroke:stroke, 'stroke-width':1.2}));
+    svg.appendChild(el('line',{x1:p3x, y1:p3y, x2:p3x+off, y2:p3y+off, stroke:stroke, 'stroke-width':1.2}));
+    document.getElementById('dimText').textContent = `a=${a}, tₐ=${ta}, T=${T}`;
+  }
+}
+
+/* --------------- AUTO PREVIEW CALC --------------- */
+function autoCalcPreview(){
+  const shape = document.getElementById('shape').value;
+  const get = id => { const el=document.getElementById(id); if(!el) return NaN; const v=parseFloat(el.value); return isNaN(v)? NaN : v; };
+  if(shape==='kubus'){
+    const s=get('s'); if(!isNaN(s)){ const vol=s**3, area=6*s*s; document.getElementById('formulaVol').textContent='V = s³'; document.getElementById('formulaArea').textContent='A = 6 × s²'; document.getElementById('outVol').textContent=fmt(vol); document.getElementById('outArea').textContent=fmt(area); document.getElementById('steps').innerHTML=`1) Ambil s=${s}<br>2) V = ${s}³ = ${fmt(vol)}<br>3) A = 6 × ${s}² = ${fmt(area)}`; } else { resetPreview(); }
+  } else if(shape==='balok'){
+    const p=get('p'), l=get('l'), t=get('t'); if(!isNaN(p)&&!isNaN(l)&&!isNaN(t)){ const vol=p*l*t, area=2*(p*l + p*t + l*t); document.getElementById('formulaVol').textContent='V = p × l × t'; document.getElementById('formulaArea').textContent='A = 2(pl + pt + lt)'; document.getElementById('outVol').textContent=fmt(vol); document.getElementById('outArea').textContent=fmt(area); document.getElementById('steps').innerHTML=`1) p=${p}, l=${l}, t=${t}<br>2) V = ${p}×${l}×${t} = ${fmt(vol)}<br>3) A = 2(${p}×${l} + ${p}×${t} + ${l}×${t}) = ${fmt(area)}`; } else { resetPreview(); }
+  } else if(shape==='tabung'){
+    const r=get('r'), t=get('t'); if(!isNaN(r)&&!isNaN(t)){ const vol=Math.PI*r*r*t, area=2*Math.PI*r*(r+t); document.getElementById('formulaVol').textContent='V = π r² t'; document.getElementById('formulaArea').textContent='A = 2πr(r + t)'; document.getElementById('outVol').textContent=fmt(vol); document.getElementById('outArea').textContent=fmt(area); document.getElementById('steps').innerHTML=`1) Luas alas = π×${r}² = ${fmt(Math.PI*r*r)}<br>2) V = luas alas × ${t} = ${fmt(vol)}<br>3) A = 2π×${r}(${r}+${t}) = ${fmt(area)}`; } else { resetPreview(); }
+  } else if(shape==='bola'){
+    const r=get('r'); if(!isNaN(r)){ const vol=4/3*Math.PI*r**3, area=4*Math.PI*r**2; document.getElementById('formulaVol').textContent='V = 4/3 π r³'; document.getElementById('formulaArea').textContent='A = 4 π r²'; document.getElementById('outVol').textContent=fmt(vol); document.getElementById('outArea').textContent=fmt(area); document.getElementById('steps').innerHTML=`1) V = 4/3 π × ${r}³ = ${fmt(vol)}<br>2) A = 4π × ${r}² = ${fmt(area)}`; } else { resetPreview(); }
+  } else if(shape==='kerucut'){
+    const r=get('r'), t=get('t'), s=get('s'); let slant=s; if(isNaN(s) && !isNaN(r) && !isNaN(t)) slant=Math.sqrt(r*r + t*t); if(!isNaN(r) && !isNaN(t)){ const vol=1/3*Math.PI*r*r*t; const area = (!isNaN(s) || !isNaN(slant)) ? Math.PI*r*(r+slant) : '-'; document.getElementById('formulaVol').textContent='V = 1/3 π r² t'; document.getElementById('formulaArea').textContent='A = π r (r + s)'; document.getElementById('outVol').textContent=fmt(vol); document.getElementById('outArea').textContent=area==='-'?'-':fmt(area); document.getElementById('steps').innerHTML=`1) Jika s tidak diisi, s = √(r²+t²) = ${isNaN(slant)?'-':fmt(slant)}<br>2) V = 1/3 π × ${r}² × ${t} = ${fmt(vol)}<br>3) A = π × ${r}(${r} + ${fmt(slant)}) = ${isNaN(area)?'-':fmt(area)}`; } else { resetPreview(); }
+  } else if(shape==='prisma'){
+    const a=get('a'), ta=get('ta'), T=get('T'); if(!isNaN(a)&&!isNaN(ta)&&!isNaN(T)){ const luasAlas=0.5*a*ta; const vol=luasAlas*T; document.getElementById('formulaVol').textContent='V = (1/2 × a × tₐ) × T'; document.getElementById('formulaArea').textContent='A = 2×LuasAlas + KelilingAlas × T (butuh sisi)'; document.getElementById('outVol').textContent=fmt(vol); document.getElementById('outArea').textContent='Perlu sisi alas lengkap'; document.getElementById('steps').innerHTML=`1) Luas alas = 1/2 × ${a} × ${ta} = ${fmt(luasAlas)}<br>2) V = ${fmt(luasAlas)} × ${T} = ${fmt(vol)}<br>3) Untuk A, butuh panjang sisi alas (tidak lengkap)`; } else { resetPreview(); }
+  } else { resetPreview(); }
+}
+function resetPreview(){
+  document.getElementById('formulaVol').textContent='-';
+  document.getElementById('formulaArea').textContent='-';
+  document.getElementById('outVol').textContent='-';
+  document.getElementById('outArea').textContent='-';
+  document.getElementById('steps').innerHTML='-';
+}
+
+/* --------------- FINAL CALCULATE (on button) --------------- */
+function calculate(){
+  drawSVG(); autoCalcPreview();
+}
+
+/* --------------- CLEAR ALL --------------- */
+function clearAll(){
+  document.querySelectorAll('#inputs input').forEach(i=> i.value='');
+  resetPreview();
+  document.getElementById('dimText').textContent='Dimensi: -';
+  document.getElementById('svgCanvas').innerHTML='';
+}
+
+/* --------------- attach after inputs built --------------- */
+function afterInputsBuilt(){ document.querySelectorAll('#inputs input').forEach(i=> i.oninput = ()=> { drawSVG(); autoCalcPreview(); }); drawSVG(); autoCalcPreview(); }
+
+/* --------------- wrapper onShapeChange to call afterInputsBuilt --------------- */
+function onShapeChange(){
+  const shape = document.getElementById('shape').value;
+  const box = document.getElementById('inputs');
+  box.innerHTML='';
+  templates[shape].forEach(t=>{
+    const lab=document.createElement('label'); lab.textContent=t.label; box.appendChild(lab);
+    const inp=document.createElement('input'); inp.type='number'; inp.id=t.id; box.appendChild(inp);
+  });
+  setTimeout(afterInputsBuilt,40);
+}
+
+/* init when page loaded so login can show, app waits for login */
+document.addEventListener('DOMContentLoaded', ()=> {
+  // nothing until login
+});
+</script>
+
+</body>
+</html>
